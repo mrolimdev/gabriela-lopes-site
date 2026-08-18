@@ -1,5 +1,5 @@
 {
-  "name": "Gabriela Lopes - Captura de Leads (Zero Configuração de Credencial)",
+  "name": "Gabriela Lopes - Captura de Leads com n8n Data Tables",
   "nodes": [
     {
       "parameters": {
@@ -20,10 +20,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Tratamento e Estruturação Completa do Lead\nconst input = $input.first().json.body || $input.first().json;\n\nconst email = (input.email || '').trim().toLowerCase();\nconst dataAtual = new Date();\n\n// Formatação data BR\nconst dataFormatada = new Intl.DateTimeFormat('pt-BR', {\n  dateStyle: 'short',\n  timeStyle: 'medium',\n  timeZone: 'America/Sao_Paulo'\n}).format(dataAtual);\n\n// Extrai primeiro nome sugerido (ex: maria.silva@ -> Maria)\nconst rawName = email.split('@')[0].split('.')[0].replace(/[0-9_]/g, '');\nconst nomeSugerido = rawName ? (rawName.charAt(0).toUpperCase() + rawName.slice(1)) : 'Inscrito';\n\nreturn [{\n  json: {\n    id: 'LEAD-' + Date.now(),\n    email: email,\n    nomeSugerido: nomeSugerido,\n    origem: input.origem || 'Landing Page Em Desenvolvimento',\n    marca: input.marca || 'Gabriela Lopes',\n    dataRegistroBR: dataFormatada,\n    timestampISO: dataAtual.toISOString(),\n    status: 'Novo Lead'\n  }\n}];"
+        "jsCode": "// Tratamento e Estruturação das Colunas da Tabela\nconst input = $input.first().json.body || $input.first().json;\n\nconst email = (input.email || '').trim().toLowerCase();\nconst dataAtual = new Date();\n\n// Data formatada brasileira\nconst dataFormatada = new Intl.DateTimeFormat('pt-BR', {\n  dateStyle: 'short',\n  timeStyle: 'medium',\n  timeZone: 'America/Sao_Paulo'\n}).format(dataAtual);\n\n// Extrai primeiro nome sugerido\nconst rawName = email.split('@')[0].split('.')[0].replace(/[0-9_]/g, '');\nconst nomeSugerido = rawName ? (rawName.charAt(0).toUpperCase() + rawName.slice(1)) : 'Inscrito';\n\nreturn [{\n  json: {\n    email: email,\n    nome: nomeSugerido,\n    origem: input.origem || 'Landing Page Em Desenvolvimento',\n    marca: input.marca || 'Gabriela Lopes',\n    data_registro: dataFormatada\n  }\n}];"
       },
       "id": "a1b2c3d4-e5f6-4a5b-8c7d-998877665544",
-      "name": "Estruturar Dados do Lead",
+      "name": "Preparar Colunas do Lead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -33,8 +33,30 @@
     },
     {
       "parameters": {
+        "operation": "insertRow",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "leads_gabriela_lopes"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        }
+      },
+      "id": "d4e5f6a1-b2c3-4d5e-6f7a-8b9c0d1e2f3a",
+      "name": "Salvar no n8n Data Tables",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
         "respondWith": "json",
-        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Lead capturado com sucesso!\",\n  \"email\": \"{{ $json.email }}\",\n  \"data\": \"{{ $json.dataRegistroBR }}\"\n}",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Lead salvo com sucesso no n8n Data Tables!\",\n  \"email\": \"{{ $('Preparar Colunas do Lead').item.json.email }}\",\n  \"data\": \"{{ $('Preparar Colunas do Lead').item.json.data_registro }}\"\n}",
         "options": {}
       },
       "id": "e5f6a1b2-3c4d-4e5f-a6b7-c8d9e0f1a2b3",
@@ -42,7 +64,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        700,
+        940,
         300
       ]
     }
@@ -53,14 +75,25 @@
       "main": [
         [
           {
-            "node": "Estruturar Dados do Lead",
+            "node": "Preparar Colunas do Lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Estruturar Dados do Lead": {
+    "Preparar Colunas do Lead": {
+      "main": [
+        [
+          {
+            "node": "Salvar no n8n Data Tables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar no n8n Data Tables": {
       "main": [
         [
           {
@@ -76,6 +109,6 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "3.0",
-  "id": "gabriela-lopes-landing-lead-no-credentials"
+  "versionId": "4.0",
+  "id": "gabriela-lopes-data-tables-lead"
 }

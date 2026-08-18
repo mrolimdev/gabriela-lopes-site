@@ -185,6 +185,11 @@ body {
   50% { opacity: 0.35; transform: scale(0.8); }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .badge-text {
   font-size: 0.72rem;
   letter-spacing: 0.22em;

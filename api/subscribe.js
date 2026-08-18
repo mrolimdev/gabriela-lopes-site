@@ -70,12 +70,25 @@ export default async function handler(req, res) {
       ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'Desconhecido'
     };
 
-    // 4. URL do Webhook n8n (Variável de Ambiente ou URL configurada)
-    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || 'https://n8n.atendente.pro/webhook-test/gabriela-lopes-leads';
+    // 4. URL do Webhook n8n (Prioriza Produção ativa ou Variável de Ambiente)
+    const n8nProdUrl = process.env.N8N_WEBHOOK_URL || 'https://n8n.atendente.pro/webhook/gabriela-lopes-leads';
+    const n8nTestUrl = 'https://n8n.atendente.pro/webhook-test/gabriela-lopes-leads';
 
-    if (n8nWebhookUrl) {
-      try {
-        const n8nResponse = await fetch(n8nWebhookUrl, {
+    let n8nSuccess = false;
+
+    try {
+      let n8nResponse = await fetch(n8nProdUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'GabrielaLopes-API/1.0'
+        },
+        body: JSON.stringify(leadPayload)
+      });
+
+      // Se der 404 na produção, tenta o webhook de teste
+      if (!n8nResponse.ok && n8nResponse.status === 404) {
+        n8nResponse = await fetch(n8nTestUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -83,13 +96,16 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify(leadPayload)
         });
-
-        if (!n8nResponse.ok) {
-          console.error('[n8n Webhook Error]:', n8nResponse.status, await n8nResponse.text());
-        }
-      } catch (webhookError) {
-        console.error('[Falha ao comunicar com n8n]:', webhookError);
       }
+
+      if (n8nResponse.ok) {
+        n8nSuccess = true;
+        console.log('✅ Lead enviado com sucesso para o n8n:', leadPayload.email);
+      } else {
+        console.error('[n8n Webhook Error]:', n8nResponse.status, await n8nResponse.text());
+      }
+    } catch (webhookError) {
+      console.error('[Falha ao comunicar com n8n]:', webhookError);
     }
 
     // 5. Retorno de sucesso para o frontend

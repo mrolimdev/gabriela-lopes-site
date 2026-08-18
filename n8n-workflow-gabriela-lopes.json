@@ -1,6 +1,19 @@
 {
-  "name": "Gabriela Lopes - Captura de Leads com n8n Data Tables",
+  "name": "Gabriela Lopes - Captura de Leads (Data Table auto-criada)",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## 🌸 Captura de Leads — Gabriela Lopes\n\n**Fluxo:** Webhook → Preparar Lead → **Garantir Tabela** → Salvar Lead → Responder\n\nO nó **Garantir Tabela** usa `Table → Create` com a opção **Reuse Existing Tables** ligada:\n- 1ª execução: cria a tabela `leads_gabriela_lopes` com as 8 colunas.\n- Execuções seguintes: reaproveita a tabela existente, sem erro.\n\nNão é preciso criar nada na aba *Data tables* nem configurar credencial.\n\n### Como instalar\n1. **Desative/apague o workflow antigo** que usa o path `gabriela-lopes-leads` (dois workflows ativos no mesmo path dão conflito).\n2. n8n → *Import from File* → este JSON.\n3. Clique em **Active** (canto superior direito).\n4. URL de produção: `https://n8n.atendente.pro/webhook/gabriela-lopes-leads`\n\n### Ver os leads\nMenu do projeto → **Data tables** → `leads_gabriela_lopes`",
+        "height": 560,
+        "width": 460,
+        "color": 4
+      },
+      "id": "0a1b2c3d-4e5f-4a6b-8c7d-000000000001",
+      "name": "Instruções",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-380, 120]
+    },
     {
       "parameters": {
         "httpMethod": "POST",
@@ -12,103 +25,160 @@
       "name": "Webhook Lead Site",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [
-        220,
-        300
-      ],
+      "position": [140, 300],
       "webhookId": "gabriela-lopes-leads"
     },
     {
       "parameters": {
-        "jsCode": "// Tratamento e Estruturação das Colunas da Tabela\nconst input = $input.first().json.body || $input.first().json;\n\nconst email = (input.email || '').trim().toLowerCase();\nconst dataAtual = new Date();\n\n// Data formatada brasileira\nconst dataFormatada = new Intl.DateTimeFormat('pt-BR', {\n  dateStyle: 'short',\n  timeStyle: 'medium',\n  timeZone: 'America/Sao_Paulo'\n}).format(dataAtual);\n\n// Extrai primeiro nome sugerido\nconst rawName = email.split('@')[0].split('.')[0].replace(/[0-9_]/g, '');\nconst nomeSugerido = rawName ? (rawName.charAt(0).toUpperCase() + rawName.slice(1)) : 'Inscrito';\n\nreturn [{\n  json: {\n    email: email,\n    nome: nomeSugerido,\n    origem: input.origem || 'Landing Page Em Desenvolvimento',\n    marca: input.marca || 'Gabriela Lopes',\n    data_registro: dataFormatada\n  }\n}];"
+        "jsCode": "// === Normalização do lead recebido do site (via /api/subscribe) ===\nconst raw = $input.first().json;\nconst input = raw.body || raw;\n\nconst email = String(input.email || '').trim().toLowerCase();\n\n// Guarda de segurança: sem e-mail válido não há nada para salvar\nif (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {\n  throw new Error('E-mail inválido ou ausente no payload recebido: \"' + email + '\"');\n}\n\nconst agora = new Date();\n\n// Data/hora legível no fuso de São Paulo (ex.: 18/08/2026 14:32:07)\nconst dataFormatada = new Intl.DateTimeFormat('pt-BR', {\n  dateStyle: 'short',\n  timeStyle: 'medium',\n  timeZone: 'America/Sao_Paulo'\n}).format(agora);\n\n// Primeiro nome sugerido a partir do e-mail (maria.silva@... -> Maria)\nconst bruto = email.split('@')[0].split(/[._+-]/)[0].replace(/[0-9]/g, '');\nconst nome = bruto ? bruto.charAt(0).toUpperCase() + bruto.slice(1) : 'Inscrito';\n\nreturn [{\n  json: {\n    email: email,\n    nome: nome,\n    origem: String(input.origem || 'Landing Page Em Desenvolvimento'),\n    marca: String(input.marca || 'Gabriela Lopes'),\n    data_registro: dataFormatada,\n    criado_em: String(input.dataRegistro || agora.toISOString()),\n    user_agent: String(input.userAgent || 'Desconhecido').slice(0, 300),\n    ip: String(input.ip || 'Desconhecido').slice(0, 100)\n  }\n}];"
       },
       "id": "a1b2c3d4-e5f6-4a5b-8c7d-998877665544",
-      "name": "Preparar Colunas do Lead",
+      "name": "Preparar Lead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        460,
-        300
-      ]
+      "position": [360, 300],
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "operation": "insertRow",
+        "resource": "table",
+        "operation": "create",
+        "tableName": "leads_gabriela_lopes",
+        "columns": {
+          "column": [
+            { "name": "email", "type": "string" },
+            { "name": "nome", "type": "string" },
+            { "name": "origem", "type": "string" },
+            { "name": "marca", "type": "string" },
+            { "name": "data_registro", "type": "string" },
+            { "name": "criado_em", "type": "string" },
+            { "name": "user_agent", "type": "string" },
+            { "name": "ip", "type": "string" }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "b2c3d4e5-f6a1-4b2c-9d3e-aa1122334455",
+      "name": "Garantir Tabela",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [580, 300],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
         "dataTableId": {
           "__rl": true,
           "mode": "name",
           "value": "leads_gabriela_lopes"
         },
         "columns": {
-          "mappingMode": "autoMapInputData",
-          "value": {}
-        }
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Preparar Lead').first().json.email }}",
+            "nome": "={{ $('Preparar Lead').first().json.nome }}",
+            "origem": "={{ $('Preparar Lead').first().json.origem }}",
+            "marca": "={{ $('Preparar Lead').first().json.marca }}",
+            "data_registro": "={{ $('Preparar Lead').first().json.data_registro }}",
+            "criado_em": "={{ $('Preparar Lead').first().json.criado_em }}",
+            "user_agent": "={{ $('Preparar Lead').first().json.user_agent }}",
+            "ip": "={{ $('Preparar Lead').first().json.ip }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "email", "displayName": "email", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true },
+            { "id": "nome", "displayName": "nome", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true },
+            { "id": "origem", "displayName": "origem", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true },
+            { "id": "marca", "displayName": "marca", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true },
+            { "id": "data_registro", "displayName": "data_registro", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true },
+            { "id": "criado_em", "displayName": "criado_em", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true },
+            { "id": "user_agent", "displayName": "user_agent", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true },
+            { "id": "ip", "displayName": "ip", "type": "string", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true }
+          ]
+        },
+        "options": {}
       },
-      "id": "d4e5f6a1-b2c3-4d5e-6f7a-8b9c0d1e2f3a",
-      "name": "Salvar no n8n Data Tables",
+      "id": "d4e5f6a1-b2c3-4d5e-8f7a-8b9c0d1e2f3a",
+      "name": "Salvar Lead",
       "type": "n8n-nodes-base.dataTable",
-      "typeVersion": 1,
-      "position": [
-        700,
-        300
-      ]
+      "typeVersion": 1.1,
+      "position": [800, 300],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Lead salvo com sucesso no n8n Data Tables!\",\n  \"email\": \"{{ $('Preparar Colunas do Lead').item.json.email }}\",\n  \"data\": \"{{ $('Preparar Colunas do Lead').item.json.data_registro }}\"\n}",
-        "options": {}
+        "responseBody": "={\n  \"success\": true,\n  \"stored\": true,\n  \"message\": \"Lead salvo com sucesso no n8n Data Tables!\",\n  \"email\": \"{{ $('Preparar Lead').first().json.email }}\",\n  \"nome\": \"{{ $('Preparar Lead').first().json.nome }}\",\n  \"data_registro\": \"{{ $('Preparar Lead').first().json.data_registro }}\",\n  \"tabela\": \"leads_gabriela_lopes\",\n  \"row_id\": \"{{ $json.id }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
       },
       "id": "e5f6a1b2-3c4d-4e5f-a6b7-c8d9e0f1a2b3",
-      "name": "Responder ao Webhook",
+      "name": "Responder Sucesso",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [
-        940,
-        300
-      ]
+      "position": [1040, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"stored\": false,\n  \"message\": \"Não foi possível salvar o lead na Data Table.\",\n  \"email\": {{ JSON.stringify($('Webhook Lead Site').first().json.body ? ($('Webhook Lead Site').first().json.body.email || 'desconhecido') : 'desconhecido') }},\n  \"erro\": {{ JSON.stringify(($json.error && $json.error.message) || $json.error || 'erro desconhecido') }},\n  \"tabela\": \"leads_gabriela_lopes\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "f6a1b2c3-4d5e-4f6a-b7c8-d9e0f1a2b3c4",
+      "name": "Responder Falha",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1040, 420]
     }
   ],
   "pinData": {},
   "connections": {
     "Webhook Lead Site": {
       "main": [
-        [
-          {
-            "node": "Preparar Colunas do Lead",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Preparar Lead", "type": "main", "index": 0 }]
       ]
     },
-    "Preparar Colunas do Lead": {
+    "Preparar Lead": {
       "main": [
-        [
-          {
-            "node": "Salvar no n8n Data Tables",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Garantir Tabela", "type": "main", "index": 0 }],
+        [{ "node": "Responder Falha", "type": "main", "index": 0 }]
       ]
     },
-    "Salvar no n8n Data Tables": {
+    "Garantir Tabela": {
       "main": [
-        [
-          {
-            "node": "Responder ao Webhook",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Salvar Lead", "type": "main", "index": 0 }],
+        [{ "node": "Responder Falha", "type": "main", "index": 0 }]
+      ]
+    },
+    "Salvar Lead": {
+      "main": [
+        [{ "node": "Responder Sucesso", "type": "main", "index": 0 }],
+        [{ "node": "Responder Falha", "type": "main", "index": 0 }]
       ]
     }
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "timezone": "America/Sao_Paulo"
   },
-  "versionId": "4.0",
-  "id": "gabriela-lopes-data-tables-lead"
+  "versionId": "5.0",
+  "id": "gabriela-lopes-leads-datatable-autocreate",
+  "tags": []
 }

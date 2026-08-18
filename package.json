@@ -1,10 +1,12 @@
 {
   "name": "gabriela-lopes-landing-page",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "description": "Gabriela Lopes — Site Oficial e Landing Page em Desenvolvimento",
   "scripts": {
-    "dev": "npx serve ."
+    "dev": "node dev-server.js",
+    "start": "node dev-server.js"
   },
   "keywords": [
     "gabriela-lopes",

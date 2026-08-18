@@ -1,6 +1,6 @@
 /**
  * Gabriela Lopes - Landing Page Interactivity
- * Envio seguro de leads para o n8n
+ * Envio seguro de leads para o n8n via Serverless API (/api/subscribe)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,9 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const feedback = document.getElementById('form-feedback');
 
   if (!form || !input || !feedback || !submitBtn) return;
-
-  const N8N_TEST_URL = 'https://n8n.atendente.pro/webhook-test/gabriela-lopes-leads';
-  const N8N_PROD_URL = 'https://n8n.atendente.pro/webhook/gabriela-lopes-leads';
 
   /**
    * Valida se a entrada é um e-mail válido
@@ -37,68 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
       valid: false, 
       message: 'Por favor, insira um endereço de e-mail válido.' 
     };
-  };
-
-  /**
-   * Envia o lead para o n8n diretamente ou via Serverless API
-   */
-  const sendLead = async (payload) => {
-    // 1. Tenta a API local/Vercel (/api/subscribe)
-    try {
-      const apiResponse = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      // Se for 501 (servidor local simples) ou 404, faz fallback direto
-      if (apiResponse.ok) {
-        return await apiResponse.json();
-      }
-      if (apiResponse.status !== 501 && apiResponse.status !== 404) {
-        // Erro real da API
-        const errorData = await apiResponse.json().catch(() => null);
-        throw new Error(errorData?.message || 'Erro ao processar inscrição');
-      }
-    } catch (apiErr) {
-      // Se não for Vercel (ex: python http.server local), segue para envio direto
-      console.log('Executando envio direto ao n8n...');
-    }
-
-    // 2. Envio direto para o webhook n8n (Test ou Prod)
-    const n8nPayload = {
-      email: payload.email,
-      origem: 'Landing Page Em Desenvolvimento',
-      marca: 'Gabriela Lopes',
-      dataRegistro: new Date().toISOString()
-    };
-
-    try {
-      // Tenta primeiro o webhook de teste
-      let n8nResponse = await fetch(N8N_TEST_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(n8nPayload)
-      });
-
-      // Se o teste não estiver ouvindo no momento, tenta o de produção
-      if (!n8nResponse.ok && n8nResponse.status === 404) {
-        n8nResponse = await fetch(N8N_PROD_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(n8nPayload)
-        });
-      }
-
-      if (n8nResponse.ok) {
-        return { success: true, message: '✨ Inscrição confirmada com sucesso! Você receberá novidades em primeira mão.' };
-      }
-    } catch (n8nErr) {
-      console.warn('n8n offline no momento, salvando lead localmente:', n8nErr);
-    }
-
-    // Salva lead localmente em qualquer circunstância
-    return { success: true, message: '✨ Inscrição confirmada com sucesso! Você receberá novidades em primeira mão.' };
   };
 
   /**
@@ -135,16 +70,59 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const result = await sendLead(payload);
+      // Envio para o proxy seguro /api/subscribe
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let responseData = null;
+      try {
+        responseData = await response.json();
+      } catch (jsonErr) {}
 
       // Salva backup local
       try {
         const stored = JSON.parse(localStorage.getItem('gl_leads_waitlist') || '[]');
-        stored.push({ email: payload.email, registeredAt: new Date().toISOString() });
+        stored.push({
+          email: payload.email,
+          registeredAt: new Date().toISOString(),
+          synced: response.ok
+        });
         localStorage.setItem('gl_leads_waitlist', JSON.stringify(stored));
-      } catch (err) {}
+      } catch (storageErr) {}
 
-      feedback.textContent = result?.message || '✨ Inscrição confirmada com sucesso! Você receberá novidades em primeira mão.';
+      if (response.ok) {
+        feedback.textContent = responseData?.message || '✨ Inscrição confirmada com sucesso! Você receberá novidades em primeira mão.';
+        feedback.className = 'form-feedback success';
+        input.value = '';
+        input.blur();
+
+        submitBtn.innerHTML = `
+          <span>Confirmado!</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+      } else {
+        feedback.textContent = responseData?.message || 'Ocorreu um erro ao processar. Tente novamente.';
+        feedback.className = 'form-feedback error';
+        submitBtn.innerHTML = originalBtnHTML;
+      }
+    } catch (networkError) {
+      console.error('Erro de conexão:', networkError);
+      
+      // Fallback gracioso com armazenamento local
+      try {
+        const stored = JSON.parse(localStorage.getItem('gl_leads_waitlist') || '[]');
+        stored.push({ email: payload.email, registeredAt: new Date().toISOString(), synced: false });
+        localStorage.setItem('gl_leads_waitlist', JSON.stringify(stored));
+      } catch (e) {}
+
+      feedback.textContent = '✨ Inscrição confirmada com sucesso! Você receberá novidades em primeira mão.';
       feedback.className = 'form-feedback success';
       input.value = '';
       input.blur();
@@ -155,10 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       `;
-    } catch (error) {
-      feedback.textContent = error.message || 'Ocorreu um erro ao enviar. Tente novamente.';
-      feedback.className = 'form-feedback error';
-      submitBtn.innerHTML = originalBtnHTML;
     } finally {
       submitBtn.disabled = false;
       setTimeout(() => {

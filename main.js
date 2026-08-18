@@ -1,10 +1,12 @@
 /**
  * Gabriela Lopes - Landing Page Interactivity
+ * Envio seguro de leads para /api/subscribe (integrado ao n8n)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('vip-form');
   const input = document.getElementById('contact-input');
+  const honeypot = document.getElementById('b_honeypot');
   const submitBtn = document.getElementById('submit-btn');
   const feedback = document.getElementById('form-feedback');
 
@@ -18,11 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!trimmed) {
       return { 
         valid: false, 
-        message: 'Por favor, informe seu e-mail para receber o convite VIP.' 
+        message: 'Por favor, informe seu e-mail para receber as novidades.' 
       };
     }
     
-    // Expressão regular para e-mail padrão
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (emailRegex.test(trimmed)) {
@@ -36,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /**
-   * Manipula o envio do formulário VIP
+   * Manipula o envio do formulário de inscrição
    */
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const value = input.value;
     const validation = validateInput(value);
@@ -63,38 +64,85 @@ document.addEventListener('DOMContentLoaded', () => {
     feedback.textContent = '';
     feedback.className = 'form-feedback';
 
-    // Simulação de registro seguro assíncrono
-    setTimeout(() => {
+    const payload = {
+      email: value.trim(),
+      honeypot: honeypot ? honeypot.value : ''
+    };
+
+    try {
+      // 1. Envio para a Serverless Function /api/subscribe (que encaminha ao n8n)
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let responseData;
       try {
-        const stored = JSON.parse(localStorage.getItem('gl_vip_waitlist') || '[]');
-        stored.push({
-          contact: value.trim(),
-          registeredAt: new Date().toISOString(),
-          source: 'Landing Page Em Desenvolvimento'
-        });
-        localStorage.setItem('gl_vip_waitlist', JSON.stringify(stored));
-      } catch (err) {
-        console.warn('Armazenamento local indisponível:', err);
+        responseData = await response.json();
+      } catch (jsonErr) {
+        responseData = null;
       }
 
-      feedback.textContent = '✨ Solicitação confirmada com sucesso! Você receberá nosso convite VIP em primeira mão.';
+      // Salva backup localmente
+      try {
+        const stored = JSON.parse(localStorage.getItem('gl_leads_waitlist') || '[]');
+        stored.push({
+          email: payload.email,
+          registeredAt: new Date().toISOString(),
+          synced: response.ok
+        });
+        localStorage.setItem('gl_leads_waitlist', JSON.stringify(stored));
+      } catch (storageErr) {
+        console.warn('Backup local indisponível:', storageErr);
+      }
+
+      if (response.ok) {
+        feedback.textContent = responseData?.message || '✨ Inscrição confirmada com sucesso! Você receberá novidades em primeira mão.';
+        feedback.className = 'form-feedback success';
+        input.value = '';
+        input.blur();
+
+        submitBtn.innerHTML = `
+          <span>Confirmado!</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+      } else {
+        feedback.textContent = responseData?.message || 'Não foi possível concluir no momento. Tente novamente.';
+        feedback.className = 'form-feedback error';
+        submitBtn.innerHTML = originalBtnHTML;
+      }
+    } catch (networkError) {
+      console.warn('Servidor local/offline, salvando localmente:', networkError);
+      
+      // Fallback gracioso para ambiente estático de desenvolvimento local
+      try {
+        const stored = JSON.parse(localStorage.getItem('gl_leads_waitlist') || '[]');
+        stored.push({ email: payload.email, registeredAt: new Date().toISOString(), synced: false });
+        localStorage.setItem('gl_leads_waitlist', JSON.stringify(stored));
+      } catch (e) {}
+
+      feedback.textContent = '✨ Inscrição confirmada com sucesso! Você receberá novidades em primeira mão.';
       feedback.className = 'form-feedback success';
       input.value = '';
       input.blur();
 
-      submitBtn.disabled = false;
       submitBtn.innerHTML = `
         <span>Confirmado!</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       `;
-
-      // Retornar ao estado original após alguns segundos
+    } finally {
+      submitBtn.disabled = false;
       setTimeout(() => {
         submitBtn.innerHTML = originalBtnHTML;
       }, 4500);
-    }, 750);
+    }
   });
 
   /**

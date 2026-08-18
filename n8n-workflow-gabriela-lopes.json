@@ -1,0 +1,133 @@
+{
+  "name": "Gabriela Lopes - Captura de Leads Landing Page",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gabriela-lopes-leads",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7b0e12d4-1a3b-4c5e-8f9a-112233445566",
+      "name": "Webhook Lead Site",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "webhookId": "gabriela-lopes-leads"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tratamento, Formatação e Enriquecimento do Lead\nconst input = $input.first().json.body || $input.first().json;\n\nconst email = (input.email || '').trim().toLowerCase();\nconst dataAtual = new Date();\n\n// Formatação de data brasileira (BRT)\nconst dataFormatada = new Intl.DateTimeFormat('pt-BR', {\n  dateStyle: 'short',\n  timeStyle: 'medium',\n  timeZone: 'America/Sao_Paulo'\n}).format(dataAtual);\n\n// Extrai um primeiro nome sugerido a partir do e-mail (ex: maria.silva@ -> Maria)\nconst rawName = email.split('@')[0].split('.')[0].replace(/[0-9_]/g, '');\nconst nomeSugerido = rawName.charAt(0).toUpperCase() + rawName.slice(1);\n\nreturn [{\n  json: {\n    email: email,\n    nomeSugerido: nomeSugerido || 'Inscrito',\n    origem: input.origem || 'Landing Page Em Desenvolvimento',\n    marca: input.marca || 'Gabriela Lopes',\n    dataRegistroBR: dataFormatada,\n    timestampISO: dataAtual.toISOString(),\n    status: 'Novo Lead',\n    userAgent: input.userAgent || 'N/A'\n  }\n}];"
+      },
+      "id": "a1b2c3d4-e5f6-4a5b-8c7d-998877665544",
+      "name": "Formatar e Tratar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Lead capturado com sucesso no n8n!\",\n  \"lead\": \"{{ $json.email }}\",\n  \"timestamp\": \"{{ $json.timestampISO }}\"\n}",
+        "options": {}
+      },
+      "id": "e5f6a1b2-3c4d-4e5f-a6b7-c8d9e0f1a2b3",
+      "name": "Responder ao Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "col_email",
+              "name": "E-mail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "col_data",
+              "name": "Data e Hora",
+              "value": "={{ $json.dataRegistroBR }}",
+              "type": "string"
+            },
+            {
+              "id": "col_origem",
+              "name": "Origem",
+              "value": "={{ $json.origem }}",
+              "type": "string"
+            },
+            {
+              "id": "col_status",
+              "name": "Status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c",
+      "name": "Preparar para Planilha / CRM",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        700,
+        480
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Lead Site": {
+      "main": [
+        [
+          {
+            "node": "Formatar e Tratar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar e Tratar Dados": {
+      "main": [
+        [
+          {
+            "node": "Responder ao Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar para Planilha / CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0",
+  "id": "gabriela-lopes-landing-lead",
+  "tags": [
+    {
+      "name": "Gabriela Lopes",
+      "id": "1"
+    }
+  ]
+}

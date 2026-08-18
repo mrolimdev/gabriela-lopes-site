@@ -11,31 +11,27 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!form || !input || !feedback || !submitBtn) return;
 
   /**
-   * Valida se a entrada é um e-mail ou número de telefone/WhatsApp válido
+   * Valida se a entrada é um e-mail válido
    */
   const validateInput = (value) => {
     const trimmed = value.trim();
     if (!trimmed) {
       return { 
         valid: false, 
-        message: 'Por favor, informe seu e-mail ou WhatsApp para receber o convite VIP.' 
+        message: 'Por favor, informe seu e-mail para receber o convite VIP.' 
       };
     }
     
     // Expressão regular para e-mail padrão
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    // Expressão regular para telefone (com ou sem DDD, com ou sem +55)
-    const phoneClean = trimmed.replace(/\D/g, '');
-    const isPhone = phoneClean.length >= 10 && phoneClean.length <= 14;
 
-    if (emailRegex.test(trimmed) || isPhone) {
+    if (emailRegex.test(trimmed)) {
       return { valid: true };
     }
 
     return { 
       valid: false, 
-      message: 'Por favor, insira um e-mail válido ou WhatsApp com DDD.' 
+      message: 'Por favor, insira um endereço de e-mail válido.' 
     };
   };
 

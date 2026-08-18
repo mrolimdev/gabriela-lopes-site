@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gabriela Lopes | Em Desenvolvimento • Seu olhar, sua assinatura</title>
+  <meta name="description" content="Gabriela Lopes — Exclusividade, refinamento e sofisticação em óculos e vestuário. Em breve, uma nova experiência.">
+  <meta name="theme-color" content="#140b06">
+
+  <!-- Open Graph / Meta Compartilhamento -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Gabriela Lopes | Em Desenvolvimento">
+  <meta property="og:description" content="Exclusividade, refinamento e sofisticação em óculos e vestuário. Seu olhar, sua assinatura.">
+  <meta property="og:image" content="identidadevisual/foto.webp">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="identidadevisual/FUNDO MARROM (PNG).png">
+  
+  <!-- Google Fonts: Cormorant Garamond (Editorial Serif) & Plus Jakarta Sans (Modern Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Efeitos de Luz Ambiente de Fundo -->
+  <div class="background-ambient" aria-hidden="true">
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <main class="page-container" id="app">
+    <!-- Coluna Editorial / Conteúdo -->
+    <section class="content-panel">
+      <header class="brand-header">
+        <a href="#" class="brand-logo-link" aria-label="Gabriela Lopes Início">
+          <img 
+            src="identidadevisual/CREME (SEM FUNDO).png" 
+            alt="Logotipo Gabriela Lopes" 
+            class="brand-logo" 
+            width="260"
+            height="88"
+          >
+        </a>
+      </header>
+
+      <div class="editorial-body">
+        <div class="status-badge" role="status">
+          <span class="badge-dot" aria-hidden="true"></span>
+          <span class="badge-text">NOVA COLEÇÃO • EM DESENVOLVIMENTO</span>
+        </div>
+
+        <h1 class="main-title">
+          A sofisticação que redefine <br><span class="italic-serif">o seu olhar.</span>
+        </h1>
+
+        <p class="tagline">"Seu olhar, sua assinatura."</p>
+
+        <p class="description">
+          Estamos preparando uma experiência única que transcende as tendências passageiras. Uma seleção exclusiva de óculos e peças de vestuário criadas para expressar autenticidade, poder e elegância atemporal.
+        </p>
+
+        <!-- Formulário Lista VIP -->
+        <form class="vip-form" id="vip-form" novalidate>
+          <label for="contact-input" class="form-label">Cadastre-se para receber o convite do pré-lançamento exclusivo:</label>
+          <div class="input-group">
+            <input 
+              type="text" 
+              id="contact-input" 
+              name="contact" 
+              placeholder="Digite seu e-mail ou WhatsApp" 
+              required
+              autocomplete="email"
+              aria-describedby="form-feedback"
+            >
+            <button type="submit" class="btn-primary" id="submit-btn" aria-label="Garantir Acesso VIP">
+              <span>Acesso VIP</span>
+              <svg class="arrow-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div class="form-feedback" id="form-feedback" aria-live="polite"></div>
+        </form>
+      </div>
+
+      <!-- Rodapé Institucional -->
+      <footer class="footer-panel">
+        <div class="social-links">
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Siga no Instagram">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+            <span>Instagram</span>
+          </a>
+          <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Fale pelo WhatsApp">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+            <span>WhatsApp</span>
+          </a>
+        </div>
+        <p class="copyright">© 2026 Gabriela Lopes. Todos os direitos reservados.</p>
+      </footer>
+    </section>
+
+    <!-- Coluna Visual / Fotografia -->
+    <section class="visual-panel" aria-label="Apresentação Visual da Coleção">
+      <div class="image-wrapper">
+        <img 
+          src="identidadevisual/foto.webp" 
+          alt="Modelo da coleção Gabriela Lopes vestindo óculos escuros de luxo" 
+          class="hero-image"
+          fetchpriority="high"
+          loading="eager"
+        >
+        <div class="image-gradient-overlay" aria-hidden="true"></div>
+        <div class="image-border-glow" aria-hidden="true"></div>
+        
+        <!-- Badge Flutuante Glassmorphism -->
+        <div class="floating-badge">
+          <div class="badge-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <div class="badge-content">
+            <span class="badge-title">Coleção Exclusiva</span>
+            <span class="badge-sub">Design Autoral & Refinamento</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>

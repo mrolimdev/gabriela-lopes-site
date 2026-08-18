@@ -133,14 +133,13 @@ body {
   grid-template-columns: 1.15fr 0.85fr;
   grid-template-rows: auto 1fr auto;
   grid-template-areas:
-    "header  visual"
+    "header  header"
     "content visual"
-    "footer  visual";
-  max-width: 1540px;
+    "footer  footer";
+  max-width: 1480px;
   margin: 0 auto;
-  padding: 2.5rem 4rem;
-  gap: 1.5rem 4rem;
-  align-items: center;
+  padding: 2.2rem 4rem;
+  gap: 1.75rem 4rem;
   width: 100%;
 }
 
@@ -487,16 +486,17 @@ body {
   grid-area: visual;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   height: 100%;
 }
 
 .image-wrapper {
   position: relative;
   width: 100%;
-  max-width: 530px;
-  height: 82vh;
-  max-height: 720px;
+  max-width: 520px;
+  height: 100%;
+  min-height: 520px;
+  max-height: 640px;
   border-radius: 30px;
   overflow: hidden;
   box-shadow: var(--shadow-lux);
@@ -511,7 +511,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: 44% 5%;
   transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: block;
   filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.7));

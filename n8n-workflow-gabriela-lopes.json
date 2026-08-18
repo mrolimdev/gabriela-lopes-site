@@ -1,5 +1,5 @@
 {
-  "name": "Gabriela Lopes - Captura de Leads Landing Page",
+  "name": "Gabriela Lopes - Captura e Armazenamento Automático em Tabela",
   "nodes": [
     {
       "parameters": {
@@ -20,21 +20,35 @@
     },
     {
       "parameters": {
-        "jsCode": "// Tratamento, Formatação e Enriquecimento do Lead\nconst input = $input.first().json.body || $input.first().json;\n\nconst email = (input.email || '').trim().toLowerCase();\nconst dataAtual = new Date();\n\n// Formatação de data brasileira (BRT)\nconst dataFormatada = new Intl.DateTimeFormat('pt-BR', {\n  dateStyle: 'short',\n  timeStyle: 'medium',\n  timeZone: 'America/Sao_Paulo'\n}).format(dataAtual);\n\n// Extrai um primeiro nome sugerido a partir do e-mail (ex: maria.silva@ -> Maria)\nconst rawName = email.split('@')[0].split('.')[0].replace(/[0-9_]/g, '');\nconst nomeSugerido = rawName.charAt(0).toUpperCase() + rawName.slice(1);\n\nreturn [{\n  json: {\n    email: email,\n    nomeSugerido: nomeSugerido || 'Inscrito',\n    origem: input.origem || 'Landing Page Em Desenvolvimento',\n    marca: input.marca || 'Gabriela Lopes',\n    dataRegistroBR: dataFormatada,\n    timestampISO: dataAtual.toISOString(),\n    status: 'Novo Lead',\n    userAgent: input.userAgent || 'N/A'\n  }\n}];"
+        "jsCode": "// Tratamento e Formatação do Lead\nconst input = $input.first().json.body || $input.first().json;\n\nconst email = (input.email || '').trim().toLowerCase();\nconst dataAtual = new Date();\n\n// Formatação data BR\nconst dataFormatada = new Intl.DateTimeFormat('pt-BR', {\n  dateStyle: 'short',\n  timeStyle: 'medium',\n  timeZone: 'America/Sao_Paulo'\n}).format(dataAtual);\n\n// Extrai primeiro nome\nconst rawName = email.split('@')[0].split('.')[0].replace(/[0-9_]/g, '');\nconst nomeSugerido = rawName ? (rawName.charAt(0).toUpperCase() + rawName.slice(1)) : 'Inscrito';\n\nreturn [{\n  json: {\n    email: email,\n    nomeSugerido: nomeSugerido,\n    origem: input.origem || 'Landing Page Em Desenvolvimento',\n    marca: input.marca || 'Gabriela Lopes',\n    dataRegistroBR: dataFormatada,\n    timestampISO: dataAtual.toISOString()\n  }\n}];"
       },
       "id": "a1b2c3d4-e5f6-4a5b-8c7d-998877665544",
-      "name": "Formatar e Tratar Dados",
+      "name": "Formatar Dados do Lead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        460,
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS leads_gabriela_lopes (\n    id SERIAL PRIMARY KEY,\n    email VARCHAR(255) NOT NULL,\n    nome_sugerido VARCHAR(100),\n    origem VARCHAR(100),\n    marca VARCHAR(100),\n    data_registro VARCHAR(50),\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nINSERT INTO leads_gabriela_lopes (email, nome_sugerido, origem, marca, data_registro)\nVALUES ('{{ $json.email }}', '{{ $json.nomeSugerido }}', '{{ $json.origem }}', '{{ $json.marca }}', '{{ $json.dataRegistroBR }}');"
+      },
+      "id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+      "name": "Criar Tabela se Não Existir e Salvar Lead",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        680,
         300
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Lead capturado com sucesso no n8n!\",\n  \"lead\": \"{{ $json.email }}\",\n  \"timestamp\": \"{{ $json.timestampISO }}\"\n}",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Lead salvo com sucesso no banco de dados!\",\n  \"email\": \"{{ $('Formatar Dados do Lead').item.json.email }}\",\n  \"data\": \"{{ $('Formatar Dados do Lead').item.json.dataRegistroBR }}\"\n}",
         "options": {}
       },
       "id": "e5f6a1b2-3c4d-4e5f-a6b7-c8d9e0f1a2b3",
@@ -42,49 +56,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        700,
+        920,
         300
-      ]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "col_email",
-              "name": "E-mail",
-              "value": "={{ $json.email }}",
-              "type": "string"
-            },
-            {
-              "id": "col_data",
-              "name": "Data e Hora",
-              "value": "={{ $json.dataRegistroBR }}",
-              "type": "string"
-            },
-            {
-              "id": "col_origem",
-              "name": "Origem",
-              "value": "={{ $json.origem }}",
-              "type": "string"
-            },
-            {
-              "id": "col_status",
-              "name": "Status",
-              "value": "={{ $json.status }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c",
-      "name": "Preparar para Planilha / CRM",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        700,
-        480
       ]
     }
   ],
@@ -94,23 +67,29 @@
       "main": [
         [
           {
-            "node": "Formatar e Tratar Dados",
+            "node": "Formatar Dados do Lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Formatar e Tratar Dados": {
+    "Formatar Dados do Lead": {
+      "main": [
+        [
+          {
+            "node": "Criar Tabela se Não Existir e Salvar Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Tabela se Não Existir e Salvar Lead": {
       "main": [
         [
           {
             "node": "Responder ao Webhook",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Preparar para Planilha / CRM",
             "type": "main",
             "index": 0
           }
@@ -122,12 +101,6 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "1.0",
-  "id": "gabriela-lopes-landing-lead",
-  "tags": [
-    {
-      "name": "Gabriela Lopes",
-      "id": "1"
-    }
-  ]
+  "versionId": "2.0",
+  "id": "gabriela-lopes-landing-lead-db"
 }

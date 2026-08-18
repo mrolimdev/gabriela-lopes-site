@@ -2,16 +2,16 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Gabriela Lopes | Em Desenvolvimento • Seu olhar, sua assinatura</title>
   <meta name="description" content="Gabriela Lopes — Exclusividade, refinamento e sofisticação em óculos e vestuário. Em breve, uma nova experiência.">
-  <meta name="theme-color" content="#140b06">
+  <meta name="theme-color" content="#120904">
 
   <!-- Open Graph / Meta Compartilhamento -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Gabriela Lopes | Em Desenvolvimento">
   <meta property="og:description" content="Exclusividade, refinamento e sofisticação em óculos e vestuário. Seu olhar, sua assinatura.">
-  <meta property="og:image" content="identidadevisual/foto.webp">
+  <meta property="og:image" content="identidadevisual/foto_mulher_recortada.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="identidadevisual/FUNDO MARROM (PNG).png">
@@ -32,20 +32,36 @@
   </div>
 
   <main class="page-container" id="app">
+    <!-- Cabeçalho Institucional -->
+    <header class="brand-header">
+      <a href="#" class="brand-logo-link" aria-label="Gabriela Lopes Início">
+        <img 
+          src="identidadevisual/CREME (SEM FUNDO).png" 
+          alt="Logotipo Gabriela Lopes" 
+          class="brand-logo" 
+          width="250"
+          height="85"
+        >
+      </a>
+    </header>
+
+    <!-- Coluna Visual / Fotografia -->
+    <section class="visual-panel" aria-label="Apresentação Visual da Marca">
+      <div class="image-wrapper">
+        <img 
+          src="identidadevisual/foto_mulher_recortada.png" 
+          alt="Modelo da marca Gabriela Lopes vestindo óculos de sol sofisticados" 
+          class="hero-image"
+          fetchpriority="high"
+          loading="eager"
+        >
+        <div class="image-gradient-overlay" aria-hidden="true"></div>
+        <div class="image-border-glow" aria-hidden="true"></div>
+      </div>
+    </section>
+
     <!-- Coluna Editorial / Conteúdo -->
     <section class="content-panel">
-      <header class="brand-header">
-        <a href="#" class="brand-logo-link" aria-label="Gabriela Lopes Início">
-          <img 
-            src="identidadevisual/CREME (SEM FUNDO).png" 
-            alt="Logotipo Gabriela Lopes" 
-            class="brand-logo" 
-            width="260"
-            height="88"
-          >
-        </a>
-      </header>
-
       <div class="editorial-body">
         <div class="status-badge" role="status">
           <span class="badge-dot" aria-hidden="true"></span>
@@ -73,6 +89,7 @@
               placeholder="Digite seu melhor e-mail" 
               required
               autocomplete="email"
+              inputmode="email"
               aria-describedby="form-feedback"
             >
             <button type="submit" class="btn-primary" id="submit-btn" aria-label="Garantir Acesso VIP">
@@ -86,37 +103,22 @@
           <div class="form-feedback" id="form-feedback" aria-live="polite"></div>
         </form>
       </div>
-
-      <!-- Rodapé Institucional -->
-      <footer class="footer-panel">
-        <div class="social-links">
-          <a href="https://www.instagram.com/gabrielalopes_oficial" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Siga Gabriela Lopes no Instagram">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-            <span>@gabrielalopes_oficial</span>
-          </a>
-        </div>
-        <p class="copyright">© 2026 Gabriela Lopes. Todos os direitos reservados.</p>
-      </footer>
     </section>
 
-    <!-- Coluna Visual / Fotografia -->
-    <section class="visual-panel" aria-label="Apresentação Visual da Coleção">
-      <div class="image-wrapper">
-        <img 
-          src="identidadevisual/foto_mulher_recortada.png" 
-          alt="Modelo da marca Gabriela Lopes vestindo óculos de sol sofisticados" 
-          class="hero-image"
-          fetchpriority="high"
-          loading="eager"
-        >
-        <div class="image-gradient-overlay" aria-hidden="true"></div>
-        <div class="image-border-glow" aria-hidden="true"></div>
+    <!-- Rodapé Institucional -->
+    <footer class="footer-panel">
+      <div class="social-links">
+        <a href="https://www.instagram.com/gabrielalopes_oficial" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Siga Gabriela Lopes no Instagram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+          <span>@gabrielalopes_oficial</span>
+        </a>
       </div>
-    </section>
+      <p class="copyright">© 2026 Gabriela Lopes. Todos os direitos reservados.</p>
+    </footer>
   </main>
 
   <script src="main.js"></script>

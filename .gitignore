@@ -1,0 +1,14 @@
+# Logs e Sistema Operacional
+.DS_Store
+Thumbs.db
+*.log
+
+# Vercel
+.vercel
+
+# Node
+node_modules/
+package-lock.json
+
+# Ambiente e Scratch
+.superpowers/

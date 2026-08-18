@@ -1,0 +1,16 @@
+{
+  "name": "gabriela-lopes-landing-page",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gabriela Lopes — Site Oficial e Landing Page em Desenvolvimento",
+  "scripts": {
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "gabriela-lopes",
+    "landing-page",
+    "em-desenvolvimento"
+  ],
+  "author": "Gabriela Lopes",
+  "license": "UNLICENSED"
+}

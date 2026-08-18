@@ -255,7 +255,42 @@ body {
   color: var(--text-secondary);
   font-weight: 300;
   line-height: 1.75;
+  margin-bottom: 1.75rem;
+}
+
+.description strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Destaques em Pílulas */
+.features-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
   margin-bottom: 2.25rem;
+}
+
+.pill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(239, 192, 148, 0.08);
+  border: 1px solid rgba(239, 192, 148, 0.2);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-brand-cream);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: var(--transition-smooth);
+}
+
+.pill-item:hover {
+  background: rgba(239, 192, 148, 0.15);
+  border-color: var(--color-brand-nude);
+  transform: translateY(-1.5px);
 }
 
 /* Formulário VIP */
@@ -541,8 +576,13 @@ body {
   .description {
     font-size: 1rem;
     line-height: 1.7;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     max-width: 520px;
+  }
+
+  .features-pills {
+    justify-content: center;
+    margin-bottom: 1.85rem;
   }
 
   .vip-form {

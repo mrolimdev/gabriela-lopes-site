@@ -1,0 +1,21 @@
+{
+  "name": "Gabriela Lopes",
+  "short_name": "Gabriela Lopes",
+  "description": "Gabriela Lopes — Site Oficial em Desenvolvimento",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#120904",
+  "theme_color": "#120904",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

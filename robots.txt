@@ -1,0 +1,35 @@
+# Robots.txt - Gabriela Lopes Oficial
+# Permissões de indexação para buscadores tradicionais e agentes de inteligência artificial (GEO/AEO)
+
+User-agent: *
+Allow: /
+
+# Agentes de IA / LLMs (OpenAI, Anthropic, Google, Perplexity, Apple)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Sitemaps & Documentação para Agentes de IA
+Sitemap: https://gabrielalopes.com.br/sitemap.xml
+# llms.txt para contexto estruturado de inteligência artificial
+# https://llmstxt.org

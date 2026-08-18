@@ -70,8 +70,8 @@ export default async function handler(req, res) {
       ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'Desconhecido'
     };
 
-    // 4. URL do Webhook n8n (Configurada via Variável de Ambiente no Vercel: N8N_WEBHOOK_URL)
-    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
+    // 4. URL do Webhook n8n (Variável de Ambiente ou URL configurada)
+    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || 'https://n8n.atendente.pro/webhook-test/gabriela-lopes-leads';
 
     if (n8nWebhookUrl) {
       try {
@@ -90,8 +90,6 @@ export default async function handler(req, res) {
       } catch (webhookError) {
         console.error('[Falha ao comunicar com n8n]:', webhookError);
       }
-    } else {
-      console.warn('[AVISO] N8N_WEBHOOK_URL não definida no ambiente. Lead armazenado:', leadPayload.email);
     }
 
     // 5. Retorno de sucesso para o frontend
